@@ -1,0 +1,236 @@
+<html>
+<head>
+  <script type='text/javascript' src='https://code.jquery.com/jquery-1.12.4.min.js'></script>
+</head>
+<body>
+
+<noscript><p><font color="red"><strong>Sorry, this page requires JavaScript to function.</strong></font></p></noscript>
+
+<h2>I'm Cooking...</h2>
+<p><span id="meatList"></span>, weighing <select id="weight">
+  <option value="1">1</option>
+  <option value="1.5">1.5</option>
+  <option value="2">2</option>
+  <option value="2.5">2.5</option>
+  <option value="3" selected>3</option>
+  <option value="3.5">3.5</option>
+  <option value="4">4</option>
+  <option value="4.5">4.5</option>
+  <option value="5">5</option>
+</select> lb</p>
+<p><span id="sideIngredientList"></span></p>
+<p>To serve at: <input type="text" id="serveTime" size="8" /></p>
+
+<h2>Timing Chart</h2>
+<div id="chart"></div>
+
+<script>
+// Import TimePicker JS and CSS. Normally would prefer to do this in <head> but doing it here
+// allows me to inline the whole body in a WordPress page. We can't run setup() until the
+// timepicker library has loaded, and this happens asynchronously when using getScript, so 
+// fire setup() as a callback from this load.
+jQuery.getScript("https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.min.js", function( data, textStatus, jqxhr ) { setup(); });
+loadStyleSheet("https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.css");
+
+// Declare "meat" ingredient map. The keys to the map are the meat names. Each value is X, where
+// the cooking time is "X minutes per lb plus X minutes".
+var meats = new Map();
+meats.set('Chicken', 25);
+meats.set('Pork', 35);
+meats.set('Beef', 25);
+meats.set('Lamb', 25);
+
+// Declare "side" ingredient map. The keys to the top-level map are ingredient names. Each value
+// is itself a map where the key is a number of "minutes before serving time" and the value
+// is the step to complete at this time.
+var sides = new Map();
+sides.set('Roast Potatoes', new Map([
+  [90,'Peel and cut the potatoes into quarters. Place them in a saucepan and cover with cold water. Bring to the boil.'],
+  [80,'Once the potatoes have come to the boil, reduce to a simmer.'],
+  [70,'Once the potatoes have simmered for 10 minutes, drain them. Place some oil in the roasting dish, add the potatoes and add turn them to ensure they have a thin coating of oil on all sides. Return the dish to the oven.'],
+  [30,'Turn the potatoes.']
+]));
+sides.set('Roast Parsnips', new Map([
+  [65,'Peel the parsnips and chop into batons.'],
+  [60,'Place some oil in the roasting dish, add the parsnips and add turn them to ensure they have a thin coating of oil on all sides. Return the dish to the oven.']
+]));
+sides.set('Carrots', new Map([
+  [25,'Peel and chop the carrots. Place in a saucepan of cold water and bring to the boil, or in a steamer over boiling water.']
+]));
+sides.set('Swede (mashed)', new Map([
+  [40,'Peel and chop the swede. Place in a saucepan of cold water and bring to the boil.'],
+  [5,'Drain the swede, return to the saucepan (off the heat), add some butter and mash it.']
+]));
+sides.set('Sprouts', new Map([
+  [15,'Wash the sprouts and cut a small cross in the base of each sprout with a knife.'],
+  [10,'Place the sprouts into a saucepan of boiling water, or a steamer.']
+]));
+sides.set('Runner Beans', new Map([
+  [10,'Wash the runner beans and place them in a saucepan of boiling water, or in a steamer.']
+]));
+sides.set('Broad Beans', new Map([
+  [15,'Wash the broad beans and place them in a saucepan of boiling water, or in a steamer.']
+]));
+sides.set('Peas', new Map([
+  [5,'Place frozen peas into a saucepan of boiling water, or a steamer.']
+]));
+sides.set('Pigs in Blankets (full size)', new Map([
+  [40,'Wrap each sausage with a rasher of bacon.'],
+  [35,'Place the pigs in blankets into an oven dish, and place in the oven.']
+]));
+sides.set('Yorkshire Puddings (frozen)', new Map([
+  [5,'Place frozen Yorksire puddings on a baking tray in the oven.']
+]));
+sides.set('Stuffing (from packet)', new Map([
+  [35,'Boil water and make the stuffing according to packet instructions.'],
+  [30,'Form stuffing into balls.'],
+  [25,'Place stuffing on a tray or oven dish and place it in the oven.']
+]));
+sides.set('Gravy (from granules)', new Map([
+  [10,'Heat a pan of water to a gentle simmer, or if using a steamer for vegetables then use the steamer base. Add gravy granules and stir until the required thickness is achieved.'],
+  [5,'Add the juices from the meat roasting dish to the gravy.']
+]));
+
+// Set up the page contents
+function setup() {
+  // Set up serving time picker
+  jQuery('#serveTime').timepicker();
+  jQuery('#serveTime').timepicker('setTime', new Date(2000, 01, 01, 19, 0, 0, 0));
+  jQuery('#serveTime').change(function() { recalculate(); });
+  
+  // Set up meat radio buttons
+  meatRadioButtonHTML = '';
+  ings = Array.from( meats.keys() );
+  for (i = 0; i < ings.length; i++) { 
+    meatRadioButtonHTML += '<span style="margin-right:1em;"><input type="radio" name="meat" class="meatRadioButton" value="' + ings[i] + '" id="radio' + i + '"><label for="radio' + i + '">' + ings[i] + '</label></span>';
+  }
+  jQuery('#meatList').html(meatRadioButtonHTML);
+  jQuery('.meatRadioButton').change(function() { recalculate(); });
+  
+  // Set up side ingredient checkboxes
+  sideIngCheckboxHTML = '';
+  ings = Array.from( sides.keys() );
+  for (i = 0; i < ings.length; i++) { 
+    sideIngCheckboxHTML += '<span style="margin-right:1em;"><input type="checkbox" class="ingCheckbox" value="' + ings[i] + '" id="checkbox' + i + '"><label for="checkbox' + i + '">' + ings[i] + '</label></span>';
+  }
+  jQuery('#sideIngredientList').html(sideIngCheckboxHTML);
+  jQuery('.ingCheckbox').change(function() { recalculate(); });
+  
+  // Also recalc when meat weight changed
+  jQuery('#weight').change(function() { recalculate(); });
+  
+  // Default selections
+  jQuery('#radio0').prop("checked", true);
+  jQuery('#checkbox0').prop("checked", true);
+  jQuery('#checkbox2').prop("checked", true);
+  jQuery('#checkbox7').prop("checked", true);
+  jQuery('#checkbox11').prop("checked", true);
+  recalculate();
+}
+
+// Recalculate timings
+function recalculate() {
+  // Figure out which side ingredients are selected
+  chosenIngs = new Array();
+  jQuery('.ingCheckbox').each(function () {
+    if (this.checked) {
+      chosenIngs.push(jQuery(this).val());
+    }
+  });
+  
+  // Get all timings for those side ingredients
+  var allTimings = new Map();
+  for (i = 0; i < chosenIngs.length; i++) { 
+    var currentIng = sides.get(chosenIngs[i]);
+    allTimings = mergeTimingMaps(currentIng, allTimings);
+  }
+  
+  // Figure out the chosen meat
+  chosenMeat = '';
+  jQuery('.meatRadioButton').each(function () {
+    if (this.checked) {
+      chosenMeat = jQuery(this).val();
+    }
+  });
+  meatWeight = parseFloat(jQuery("#weight option:selected").val());
+  
+  // Generate meat timings
+  meatTime = (meatWeight + 1) * meats.get(chosenMeat);
+  var meatTimings = new Map();
+  meatTimings.set(meatTime + 20, "Remove the " + chosenMeat.toLowerCase() + " from the fridge and allow it to come up to room temperature.");
+  meatTimings.set(meatTime + 10, "Lightly salt the " + chosenMeat.toLowerCase() + ". Place it in a roasting tin or deep oven tray, and put it in the oven.");
+  meatTimings.set(10, "Remove the " + chosenMeat.toLowerCase() + " from the oven, transfer to a chopping board and cover with tin foil.");
+  meatTimings.set(5, "Carve the " + chosenMeat.toLowerCase() + ".");
+  
+  // Merge meat timings with side ingredient timings.
+  allTimings = mergeTimingMaps(meatTimings, allTimings);
+  
+  // Generate extra "oven on" and "serve" timings
+  longestTiming = [...allTimings.entries()].map(a => parseInt(a)).reduce((a, b) => Math.max(a, b));
+  var extraTimings = new Map();
+  extraTimings.set(longestTiming+10, "Preheat the oven to 190 Celsius.");
+  extraTimings.set(10, "Make sure the table is set!");
+  extraTimings.set(0, "Serve!");
+  
+  // Merge extra timings with meat and side ingredient timings.
+  allTimings = mergeTimingMaps(extraTimings, allTimings);
+
+  // Sort the timings earliest-first (largest key number first)
+  var steps = new Map([...allTimings.entries()].sort(function(a, b) {
+    return parseInt(b) - parseInt(a);
+  }));
+  
+  // Get the serving time
+  serveTime = jQuery('#serveTime').timepicker('getTime');
+  
+  // Build the table
+  tableHTML = '<table cellspacing="10">';
+  steps.forEach(function a(value, key, map) {
+    actualTime = new Date(serveTime - (parseInt(key) * 60000));
+    tableHTML += '<tr><td valign="top"><strong>' + formatAMPM(actualTime) + '</strong></td><td>' + value + '</td></tr>';
+  });
+  tableHTML += '</table>';
+  jQuery('#chart').html(tableHTML);
+}
+
+// Util: Time formatter
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ampm;
+  return strTime;
+}
+
+// Util: Merge timing->instruction maps
+function mergeTimingMaps(source, destination) {
+  source.forEach(function(value, key, map) {
+    // If an entry in destination already exists for this number of minutes before
+    // serving time, combine the instructions. Otherwise add a new entry.
+    if (destination.has(key)) {
+      destination.set(key, destination.get(key) + "<br/>" + value);
+    }
+    else
+    {
+      destination.set(key, value);
+    }
+  });
+  return destination;
+}
+
+// Util: CSS lazy loader
+function loadStyleSheet(src) {
+  if (document.createStyleSheet){
+    document.createStyleSheet(src);
+  }
+  else {
+    jQuery("head").append(jQuery("<link rel='stylesheet' href='"+src+"' type='text/css' media='screen' />"));
+  }
+};
+</script>
+
+</body>
+</html>
