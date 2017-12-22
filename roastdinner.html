@@ -164,8 +164,9 @@ function recalculate() {
   
   // Generate extra "oven on" and "serve" timings
   longestTiming = [...allTimings.entries()].map(a => parseInt(a)).reduce((a, b) => Math.max(a, b));
+  ovenOnTime = Math.min(meatTime + 20, longestTiming + 10);
   var extraTimings = new Map();
-  extraTimings.set(longestTiming+10, "Preheat the oven to 190 Celsius.");
+  extraTimings.set(ovenOnTime, "Preheat the oven to 190 Celsius.");
   extraTimings.set(10, "Make sure the table is set!");
   extraTimings.set(0, "Serve!");
   
