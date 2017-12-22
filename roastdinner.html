@@ -7,17 +7,7 @@
 <noscript><p><font color="red"><strong>Sorry, this page requires JavaScript to function.</strong></font></p></noscript>
 
 <h2>I'm Cooking...</h2>
-<p><span id="meatList"></span>, weighing <select id="weight">
-  <option value="1">1</option>
-  <option value="1.5">1.5</option>
-  <option value="2">2</option>
-  <option value="2.5">2.5</option>
-  <option value="3" selected>3</option>
-  <option value="3.5">3.5</option>
-  <option value="4">4</option>
-  <option value="4.5">4.5</option>
-  <option value="5">5</option>
-</select> lb</p>
+<p><span id="meatList"></span>, weighing <select id="weight"></select> lb</p>
 <p><span id="sideIngredientList"></span></p>
 <p>To serve at: <input type="text" id="serveTime" size="8" /></p>
 
@@ -32,13 +22,14 @@
 jQuery.getScript("https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.min.js", function( data, textStatus, jqxhr ) { setup(); });
 loadStyleSheet("https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.css");
 
-// Declare "meat" ingredient map. The keys to the map are the meat names. Each value is X, where
-// the cooking time is "X minutes per lb plus X minutes".
+// Declare "meat" ingredient map. The keys to the map are the meat names. Each value is an
+// array of [X, Y], where the cooking time is "X minutes per lb plus Y minutes".
 var meats = new Map();
-meats.set('Chicken', 25);
-meats.set('Pork', 35);
-meats.set('Beef', 25);
-meats.set('Lamb', 25);
+meats.set('Chicken', [25, 25]);
+meats.set('Pork', [35, 35]);
+meats.set('Beef', [25, 25]);
+meats.set('Lamb', [25, 25]);
+meats.set('Turkey', [10, 70]);
 
 // Declare "side" ingredient map. The keys to the top-level map are ingredient names. Each value
 // is itself a map where the key is a number of "minutes before serving time" and the value
@@ -116,7 +107,12 @@ function setup() {
   jQuery('#sideIngredientList').html(sideIngCheckboxHTML);
   jQuery('.ingCheckbox').change(function() { recalculate(); });
   
-  // Also recalc when meat weight changed
+  // Set up weight dropdown
+  for (i=1; i<=15; i=i+0.5)
+  {
+    jQuery('#selectBox').append('<option value='+i+'>'+i+'</option>');
+  }
+  jQuery('#weight option[value=3]').attr('selected','selected');
   jQuery('#weight').change(function() { recalculate(); });
   
   // Default selections
@@ -155,9 +151,10 @@ function recalculate() {
   meatWeight = parseFloat(jQuery("#weight option:selected").val());
   
   // Generate meat timings
-  meatTime = (meatWeight + 1) * meats.get(chosenMeat);
+  meatTime = (meatWeight * meats.get(chosenMeat)[0]) + meats.get(chosenMeat)[1];
+  meatThawTime = (meatWeight+1) * 5;
   var meatTimings = new Map();
-  meatTimings.set(meatTime + 20, "Remove the " + chosenMeat.toLowerCase() + " from the fridge and allow it to come up to room temperature.");
+  meatTimings.set(meatTime + meatThawTime, "Remove the " + chosenMeat.toLowerCase() + " from the fridge and allow it to come up to room temperature.");
   meatTimings.set(meatTime + 10, "Lightly salt the " + chosenMeat.toLowerCase() + ". Place it in a roasting tin or deep oven tray, and put it in the oven.");
   meatTimings.set(10, "Remove the " + chosenMeat.toLowerCase() + " from the oven, transfer to a chopping board and cover with tin foil.");
   meatTimings.set(5, "Carve the " + chosenMeat.toLowerCase() + ".");
@@ -185,6 +182,7 @@ function recalculate() {
   
   // Build the table
   tableHTML = '<table cellspacing="10">';
+  tableHTML += '<tr><td valign="top"></td><td>Make sure your meat isn&apos;t frozen! If it is, thaw in the fridge for at least 12 hours before starting to cook.</td></tr>';
   steps.forEach(function a(value, key, map) {
     actualTime = new Date(serveTime - (parseInt(key) * 60000));
     tableHTML += '<tr><td valign="top"><strong>' + formatAMPM(actualTime) + '</strong></td><td>' + value + '</td></tr>';
