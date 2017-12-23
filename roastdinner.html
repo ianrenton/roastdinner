@@ -7,7 +7,7 @@
 <noscript><p><font color="red"><strong>Sorry, this page requires JavaScript to function.</strong></font></p></noscript>
 
 <h2>I'm Cooking...</h2>
-<p><span id="meatList"></span>, weighing <select id="weight"></select> lb</p>
+<p><span id="meatList"></span>, weighing <input type="number" step="0.5" min="0" id="weight" style="width:4em;" value="3.5"/> lb</p>
 <p><span id="sideIngredientList"></span></p>
 <p>To serve at: <input type="text" id="serveTime" size="8" /></p>
 
@@ -107,12 +107,7 @@ function setup() {
   jQuery('#sideIngredientList').html(sideIngCheckboxHTML);
   jQuery('.ingCheckbox').change(function() { recalculate(); });
   
-  // Set up weight dropdown
-  for (i=1; i<=15; i=i+0.5)
-  {
-    jQuery('#selectBox').append('<option value='+i+'>'+i+'</option>');
-  }
-  jQuery('#weight option[value=3]').attr('selected','selected');
+  // Set up weight box
   jQuery('#weight').change(function() { recalculate(); });
   
   // Default selections
@@ -148,10 +143,11 @@ function recalculate() {
       chosenMeat = jQuery(this).val();
     }
   });
-  meatWeight = parseFloat(jQuery("#weight option:selected").val());
+  meatWeight = parseFloat(jQuery("#weight").val());
   
   // Generate meat timings
   meatTime = (meatWeight * meats.get(chosenMeat)[0]) + meats.get(chosenMeat)[1];
+  meatTime = Math.ceil(meatTime/5)*5; // Round up to nearest 5 mins for convenience
   meatThawTime = (meatWeight+1) * 5;
   var meatTimings = new Map();
   meatTimings.set(meatTime + meatThawTime, "Remove the " + chosenMeat.toLowerCase() + " from the fridge and allow it to come up to room temperature.");
