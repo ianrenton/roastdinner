@@ -166,6 +166,13 @@ function recalculate() {
   meatTimings.set(10, "Remove the " + chosenMeat.toLowerCase() + " from the oven, transfer to a chopping board and cover with tin foil.");
   meatTimings.set(5, "Carve the " + chosenMeat.toLowerCase() + ".");
   
+  // Cover/uncover meat if cooking time is long
+  // First one overrides the meatTime+10 text above.
+  if (meatTime > 120) {
+    meatTimings.set(meatTime + 10, "Lightly salt the " + chosenMeat.toLowerCase() + ". Place it in a roasting tin or deep oven tray, cover it loosely with foil, and put it in the oven.");
+    meatTimings.set(30, "Remove the foil over the " + chosenMeat.toLowerCase() + " to allow the top to brown.");
+  }
+  
   // Merge meat timings with side ingredient timings.
   allTimings = mergeTimingMaps(meatTimings, allTimings);
   
