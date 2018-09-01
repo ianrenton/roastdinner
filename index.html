@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Great Roast Dinner Timing Chart</title>
-  <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}</style>
+  <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;padding:0 10px}h1,h2,h3{line-height:1.2}table{font-size: 18px}.item{margin-right: 1em;display: inline-block}</style>
   <script type='text/javascript' src='https://code.jquery.com/jquery-1.12.4.min.js'></script>
 </head>
 <body>
@@ -104,7 +104,7 @@ function setup() {
   meatRadioButtonHTML = '';
   ings = Array.from( meats.keys() );
   for (i = 0; i < ings.length; i++) { 
-    meatRadioButtonHTML += '<span style="margin-right:1em;"><input type="radio" name="meat" class="meatRadioButton" value="' + ings[i] + '" id="radio' + i + '"/><label for="radio' + i + '">' + ings[i] + '</label></span>';
+    meatRadioButtonHTML += '<span class="item"><input type="radio" name="meat" class="meatRadioButton" value="' + ings[i] + '" id="radio' + i + '"/><label for="radio' + i + '">' + ings[i] + '</label></span>';
   }
   jQuery('#meatList').html(meatRadioButtonHTML);
   jQuery('.meatRadioButton').change(function() { recalculate(); });
@@ -113,7 +113,7 @@ function setup() {
   sideIngCheckboxHTML = '';
   ings = Array.from( sides.keys() );
   for (i = 0; i < ings.length; i++) { 
-    sideIngCheckboxHTML += '<span style="margin-right:1em;"><input type="checkbox" class="ingCheckbox" value="' + ings[i] + '" id="checkbox' + i + '"/><label for="checkbox' + i + '">' + ings[i] + '</label></span>';
+    sideIngCheckboxHTML += '<span class="item"><input type="checkbox" class="ingCheckbox" value="' + ings[i] + '" id="checkbox' + i + '"/><label for="checkbox' + i + '">' + ings[i] + '</label></span>';
   }
   jQuery('#sideIngredientList').html(sideIngCheckboxHTML);
   jQuery('.ingCheckbox').change(function() { recalculate(); });
