@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Great Roast Dinner Timing Chart</title>
-  <style type="text/css">body{margin:40px auto;max-width:700px;line-height:1.6;font-size:20px;color:#222;padding:0 10px}h1,h2,h3{line-height:1.2}table{font-size: 20px}.item{margin-right: 1em;display: inline-block}</style>
+  <style type="text/css">body{margin:40px auto;max-width:700px;line-height:1.6;font-size:20px;color:#222;padding:0 10px}h1,h2,h3{line-height:1.2}table{font-size: 20px}.item{margin-right: 1em;display: inline-block}p.warn{color:red}p.footer{color:gray;margin-top:2em;font-size:16px}</style>
   <link href="https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.css" rel="stylesheet">
   <script type='text/javascript' src='https://code.jquery.com/jquery-1.12.4.min.js'></script>
   <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.min.js'></script>
@@ -12,7 +12,7 @@
 
   <h1>The Great Roast Dinner Timing Chart</h1>
   
-<noscript><p><font color="red"><strong>Sorry, this page requires JavaScript to function.</strong></font></p></noscript>
+<noscript><p class="warn"><strong>Sorry, this page requires JavaScript to function.</strong></p></noscript>
   
 <p>Cooking a traditional roast dinner isn’t difficult—it’s really just about timing everything right so it all comes together at the right time. This page uses some Javascript magic to automatically generate you a list of timed instructions. Just select your ingredients and the time you want to serve using the options below, and the timing chart will be created for you.</p>
 
@@ -24,7 +24,8 @@
 <h2>Timing Chart</h2>
 <div id="chart"></div>
   
-  <p><font color="red">Note: This chart is provided as a guide only. If you’re in any doubt as to whether your poultry or pork is cooked properly, continue cooking until juices run clear, or ideally use a meat thermometer to check the internal temperature has reached at least 73 degrees Celsius.</font></p>
+  <p class="warn">Note: This chart is provided as a guide only. If you’re in any doubt as to whether your poultry or pork is cooked properly, continue cooking until juices run clear, or ideally use a meat thermometer to check the internal temperature has reached at least 73 degrees Celsius.</p>
+  <p class="footer">This was made by <a href="https://ianrenton.com">Ian Renton</a>. Source code is on <a href="https://github.com/ianrenton/roastdinner">Github</a>.</p>
 
 <script>
 // Declare "meat" ingredient map. The keys to the map are the meat names. Each value is an
