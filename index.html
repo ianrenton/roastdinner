@@ -4,9 +4,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Great Roast Dinner Timing Chart</title>
   <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#222;padding:0 10px}h1,h2,h3{line-height:1.2}table{font-size: 18px}.item{margin-right: 1em;display: inline-block}</style>
+  <link href="https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.css" rel="stylesheet">
   <script type='text/javascript' src='https://code.jquery.com/jquery-1.12.4.min.js'></script>
+  <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.min.js'></script>
 </head>
-<body>
+<body onload="setup();">
 
   <h1>The Great Roast Dinner Timing Chart</h1>
   
@@ -23,13 +25,6 @@
 <div id="chart"></div>
 
 <script>
-// Import TimePicker JS and CSS. Normally would prefer to do this in <head> but doing it here
-// allows me to inline the whole body in a WordPress page. We can't run setup() until the
-// timepicker library has loaded, and this happens asynchronously when using getScript, so 
-// fire setup() as a callback from this load.
-jQuery.getScript("https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.min.js", function( data, textStatus, jqxhr ) { setup(); });
-loadStyleSheet("https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.css");
-
 // Declare "meat" ingredient map. The keys to the map are the meat names. Each value is an
 // array of [X, Y], where the cooking time is "X minutes per lb plus Y minutes".
 var meats = new Map();
@@ -241,16 +236,6 @@ function mergeTimingMaps(source, destination) {
   });
   return destination;
 }
-
-// Util: CSS lazy loader
-function loadStyleSheet(src) {
-  if (document.createStyleSheet){
-    document.createStyleSheet(src);
-  }
-  else {
-    jQuery("head").append(jQuery("<link rel='stylesheet' href='"+src+"' type='text/css' media='screen' />"));
-  }
-};
 </script>
 
 </body>
