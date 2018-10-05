@@ -3,29 +3,61 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Great Roast Dinner Timing Chart</title>
-  <style type="text/css">body{margin:40px auto;max-width:750px;line-height:1.6;font-size:20px;font-family:serif;color:#222;padding:0 10px}h1,h2,h3{line-height:1.2}table, input{font-family:serif;font-size: 20px}.item{margin-right: 1em;display: inline-block}p.warn{color:red;font-size:16px}p.footer{color:gray;margin-top:2em;font-size:16px}</style>
-  <link href="https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.css" rel="stylesheet">
+  <style type="text/css">
+  body{margin:40px auto;max-width:750px;font-size:16px;font-family:sans-serif;color:#222;padding:0 10px}
+  p#intro{line-height:1.6em}
+  span#meatList,span#sideIngredientList{line-height:2.5em;}
+  .item{margin-bottom:2em;margin-right:0.5em;}
+  input{font-size:16px;}
+  fieldset{margin-bottom:1em}
+  fieldset#timingchart{margin-top:2em}
+  legend{font-weight:bold}
+  table{border-collapse: collapse;}
+  td{margin:0.5em; padding:0.5em; border-bottom:1px solid gray;}
+  td.timetd{white-space: nowrap;}
+  p.warn{color:red}
+  p.footer{color:gray;margin-top:2em;font-size:12px}
+  </style>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <script type='text/javascript' src='https://code.jquery.com/jquery-1.12.4.min.js'></script>
-  <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/timepicker@1.11.12/jquery.timepicker.min.js'></script>
+  <script type='text/javascript' src='https://code.jquery.com/ui/1.12.1/jquery-ui.min.js'></script>
+  <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/globalize/0.1.1/globalize.min.js'></script>
 </head>
 <body onload="setup();">
 
   <h1>The Great Roast Dinner Timing Chart</h1>
   
-<noscript><p class="warn"><strong>Sorry, this page requires JavaScript to function.</strong></p></noscript>
+  <noscript><p class="warn"><strong>Sorry, this page requires JavaScript to function.</strong></p></noscript>
+    
+  <p id="intro">Cooking a traditional roast dinner isn’t difficult—it’s really just about timing everything right so it all comes together at the right time. This page uses some Javascript magic to automatically generate you a list of timed instructions. Just select your ingredients and the time you want to serve using the options below, and the timing chart will be created for you.</p>
+
+  <fieldset>
+    <legend>Meat</legend>
+    <span id="meatList"></span><br/>
+    Weight: <input id="weight" style="width:4em;" value="3.5"/>
+    <input type="radio" name="unit" class="unitRadioButton" value="lb" id="radioLB" checked/><label for="radioLB">lb</label>
+    <input type="radio" name="unit" class="unitRadioButton" value="kg" id="radioKG"/><label for="radioKG">kg</label>
+  </fieldset>
+  <fieldset>
+    <legend>Vegetables & Sides</legend>
+    <span id="sideIngredientList"></span>
+  </fieldset>
+  <fieldset>
+    <legend>Serving Time</legend>
+    <input type="text" id="serveTime" size="8" value="7:00 pm"/>
+  </fieldset>
   
-<p>Cooking a traditional roast dinner isn’t difficult—it’s really just about timing everything right so it all comes together at the right time. This page uses some Javascript magic to automatically generate you a list of timed instructions. Just select your ingredients and the time you want to serve using the options below, and the timing chart will be created for you.</p>
+  <p></p>
 
-<h2>I'm Cooking...</h2>
-<p><span id="meatList"></span>, weighing <input type="number" step="0.1" min="0" id="weight" style="width:4em;" value="3.5"/> <input type="radio" name="unit" class="unitRadioButton" value="lb" id="radioLB" checked/><label for="radioLB">lb</label> <input type="radio" name="unit" class="unitRadioButton" value="kg" id="radioKG"/><label for="radioKG">kg</label></p>
-<p><span id="sideIngredientList"></span></p>
-<p>To serve at: <input type="text" id="serveTime" size="8" /></p>
-
-<h2>Timing Chart</h2>
-<div id="chart"></div>
+  <fieldset id="timingchart">
+    <legend>Timing Chart</legend>
+    <div id="chart"></div>
+  </fieldset>
   
   <p class="warn">Note: This chart is provided as a guide only. If you’re in any doubt as to whether your poultry or pork is cooked properly, continue cooking until juices run clear, or ideally use a meat thermometer to check the internal temperature has reached at least 70 degrees Celsius.</p>
   <p class="footer">This was made by <a href="https://ianrenton.com">Ian Renton</a>. Source code is on <a href="https://github.com/ianrenton/roastdinner">Github</a>.</p>
+  
+  <a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 
 <script>
 // Declare "meat" ingredient map. The keys to the map are the meat names. Each value is an
@@ -92,12 +124,7 @@ sides.set('Gravy (from granules)', new Map([
 ]));
 
 // Set up the page contents
-function setup() {
-  // Set up serving time picker
-  jQuery('#serveTime').timepicker();
-  jQuery('#serveTime').timepicker('setTime', new Date(2000, 01, 01, 19, 0, 0, 0));
-  jQuery('#serveTime').change(function() { recalculate(); });
-  
+function setup() {  
   // Set up meat radio buttons
   meatRadioButtonHTML = '';
   ings = Array.from( meats.keys() );
@@ -106,6 +133,13 @@ function setup() {
   }
   jQuery('#meatList').html(meatRadioButtonHTML);
   jQuery('.meatRadioButton').change(function() { recalculate(); });
+  jQuery('.meatRadioButton').checkboxradio();
+  
+  // Set up weight boxes
+  jQuery('#weight').spinner({step: 0.1, min:0, change: function() {recalculate()}, stop: function() {recalculate()}});
+  jQuery('.unitRadioButton').checkboxradio();
+  jQuery('#radioLB').change(function() { jQuery("#weight").val((parseFloat(jQuery("#weight").val()) / 0.454).toPrecision(2)); recalculate(); });
+  jQuery('#radioKG').change(function() { jQuery("#weight").val((parseFloat(jQuery("#weight").val()) * 0.454).toPrecision(2)); recalculate(); });
   
   // Set up side ingredient checkboxes
   sideIngCheckboxHTML = '';
@@ -115,18 +149,34 @@ function setup() {
   }
   jQuery('#sideIngredientList').html(sideIngCheckboxHTML);
   jQuery('.ingCheckbox').change(function() { recalculate(); });
+  jQuery('.ingCheckbox').checkboxradio();
   
-  // Set up weight boxes
-  jQuery('#weight').change(function() { recalculate(); });
-  jQuery('#radioLB').change(function() { jQuery("#weight").val((parseFloat(jQuery("#weight").val()) / 0.454).toPrecision(2)); recalculate(); });
-  jQuery('#radioKG').change(function() { jQuery("#weight").val((parseFloat(jQuery("#weight").val()) * 0.454).toPrecision(2)); recalculate(); });
+  // Set up serving time picker
+  jQuery.widget( "ui.timespinner", $.ui.spinner, {
+      options: { step: 60 * 1000 * 15, page: 4 },
+      _parse: function( value ) {
+        if ( typeof value === "string" ) {
+          return parseTime(value).getTime();
+        }
+        return value;
+      },
+      _format: function( value ) {
+        return formatTime(new Date(value));
+      }
+    });
+  jQuery('#serveTime').timespinner({change: function() {recalculate()}, stop: function() {recalculate()}});
   
   // Default selections
   jQuery('#radio0').prop("checked", true);
+  jQuery('#radio0').button( "refresh" );
   jQuery('#checkbox0').prop("checked", true);
+  jQuery('#checkbox0').button( "refresh" );
   jQuery('#checkbox2').prop("checked", true);
+  jQuery('#checkbox2').button( "refresh" );
   jQuery('#checkbox8').prop("checked", true);
+  jQuery('#checkbox8').button( "refresh" );
   jQuery('#checkbox12').prop("checked", true);
+  jQuery('#checkbox12').button( "refresh" );
   recalculate();
 }
 
@@ -199,29 +249,38 @@ function recalculate() {
   }));
   
   // Get the serving time
-  serveTime = jQuery('#serveTime').timepicker('getTime');
+  serveTime = jQuery('#serveTime').timespinner('value')
   
   // Build the table
-  tableHTML = '<table cellspacing="10">';
+  tableHTML = '<table>';
   tableHTML += '<tr><td valign="top"></td><td>Make sure your meat isn&apos;t frozen! If it is, thaw in the fridge for at least 12 hours before starting to cook.</td></tr>';
   steps.forEach(function a(value, key, map) {
     actualTime = new Date(serveTime - (parseInt(key) * 60000));
-    tableHTML += '<tr><td valign="top"><strong>' + formatAMPM(actualTime) + '</strong></td><td>' + value + '</td></tr>';
+    tableHTML += '<tr><td valign="top" class="timetd"><strong>' + formatTime(actualTime) + '</strong></td><td>' + value + '</td></tr>';
   });
   tableHTML += '</table>';
   jQuery('#chart').html(tableHTML);
 }
 
 // Util: Time formatter
-function formatAMPM(date) {
+function formatTime(date) {
   var hours = date.getHours();
   var minutes = date.getMinutes();
   var ampm = hours >= 12 ? 'pm' : 'am';
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
   minutes = minutes < 10 ? '0'+minutes : minutes;
-  var strTime = hours + ':' + minutes + ampm;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
   return strTime;
+}
+
+// Util: Time parser
+function parseTime(t) {
+  var d = new Date();
+  var time = t.match( /(\d+)(?::(\d\d))?\s*(p?)/ );
+  d.setHours( parseInt( time[1]) + (time[3] ? 12 : 0) );
+  d.setMinutes( parseInt( time[2]) || 0 );
+  return d;
 }
 
 // Util: Merge timing->instruction maps
