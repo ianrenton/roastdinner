@@ -111,6 +111,12 @@ sides.set('Pigs in Blankets (full size)', new Map([
 sides.set('Yorkshire Puddings (frozen)', new Map([
   [5,'Place frozen Yorksire puddings on a baking tray in the oven.']
 ]));
+sides.set('Yorkshire Puddings (batter mix)', new Map([
+  [45, 'Mix the Yorkshire pudding batter as instructed by packaging'],
+  [40, 'Place Yorkshire puddings tin with a little oil in each, and put in oven to warm'],
+  [25, 'Divide Yorkshire pudding batter equally into tin compartments and it back into the oven'],
+  [5, 'Remove Yorkshire puddings from oven, or when they are risen and golden']
+]));
 sides.set('Stuffing (from packet)', new Map([
   [35,'Boil water and make the stuffing according to packet instructions.'],
   [30,'Form stuffing into balls.'],
@@ -217,7 +223,7 @@ function recalculate() {
   var meatTimings = new Map();
   meatTimings.set(meatTime + meatThawTime, "Remove the " + chosenMeat.toLowerCase() + " from the fridge and allow it to come up to room temperature.");
   meatTimings.set(meatTime + 10, "Lightly salt the " + chosenMeat.toLowerCase() + ". Place it in a roasting tin or deep oven tray, and put it in the oven.");
-  meatTimings.set(10, "Remove the " + chosenMeat.toLowerCase() + " from the oven, transfer to a chopping board and cover with tin foil.");
+  meatTimings.set(20, "Remove the " + chosenMeat.toLowerCase() + " from the oven, transfer to a chopping board and cover with tin foil.");
   meatTimings.set(5, "Carve the " + chosenMeat.toLowerCase() + ".");
   
   // Cover/uncover meat if cooking time is long
