@@ -218,7 +218,7 @@ function recalculate() {
   // Generate meat timings
   meatTime = (meatWeight * meats.get(chosenMeat)[0]) + meats.get(chosenMeat)[1];
   meatTime = Math.ceil(meatTime/5)*5; // Round up to nearest 5 mins for convenience
-  meatThawTime = (meatWeight+1) * 5;
+  meatThawTime = (meatWeight+4) * 5;
   meatThawTime = Math.ceil(meatThawTime/5)*5; // Round up to nearest 5 mins for convenience
   var meatTimings = new Map();
   meatTimings.set(meatTime + meatThawTime, "Remove the " + chosenMeat.toLowerCase() + " from the fridge and allow it to come up to room temperature.");
