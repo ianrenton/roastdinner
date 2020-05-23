@@ -240,7 +240,7 @@ function recalculate() {
   longestTiming = [...allTimings.entries()].map(a => parseInt(a)).reduce((a, b) => Math.max(a, b));
   ovenOnTime = Math.min(meatTime + 20, longestTiming + 10);
   var extraTimings = new Map();
-  extraTimings.set(ovenOnTime, "Preheat the oven to 190 Celsius.");
+  extraTimings.set(ovenOnTime, "Preheat the oven to 190°C / 375°F / Gas Mark 5.");
   extraTimings.set(10, "Make sure the table is set!");
   extraTimings.set(0, "Serve!");
   
