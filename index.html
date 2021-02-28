@@ -229,7 +229,7 @@ function recalculate() {
   
   // Cover/uncover meat if cooking time is long
   // First one overrides the meatTime+10 text above.
-  if (meatTime > 120) {
+  if (meatTime > 150) {
     meatTimings.set(meatTime + 10, "Lightly salt the " + chosenMeat.toLowerCase() + ". Place it in a roasting tin or deep oven tray, cover it loosely with foil, and put it in the oven.");
     meatTimings.set(60, "Remove the foil over the " + chosenMeat.toLowerCase() + " to allow the top to brown.");
   }
