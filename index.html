@@ -296,7 +296,7 @@ function recalculate() {
   
   // Build the table
   tableHTML = '<table>';
-  tableHTML += '<tr><td valign="top"></td><td>Make sure your meat isn&apos;t frozen! If it is, thaw in the fridge for at least 12 hours before starting to cook.</td></tr>';
+  tableHTML += '<tr><td valign="top"></td><td>Make sure your meat isn&apos;t frozen! If it is, thaw it out before starting to cook. This could be overnight for smaller joints of meat but could take several days for a huge turkey.</td></tr>';
   steps.forEach(function a(value, key, map) {
     actualTime = new Date(serveTime - (parseInt(key) * 60000));
     tableHTML += '<tr><td valign="top" class="timetd"><strong>' + formatTime(actualTime) + '</strong></td><td>' + value + '</td></tr>';
