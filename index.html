@@ -40,8 +40,12 @@
     <input type="radio" name="unit" class="unitRadioButton" value="kg" id="radioKG"/><label for="radioKG">kg</label>
   </fieldset>
   <fieldset>
-    <legend>Vegetables & Sides</legend>
-    <span id="sideIngredientList"></span>
+    <legend>Vegetables</legend>
+    <span id="vegList"></span>
+  </fieldset>
+  <fieldset>
+    <legend>Extras</legend>
+    <span id="extrasList"></span>
   </fieldset>
   <fieldset>
     <legend>Serving Time</legend>
@@ -68,75 +72,76 @@ meats.set('Beef', [25, 25]);
 meats.set('Lamb', [25, 25]);
 meats.set('Turkey', [10, 70]);
 
-// Declare "side" ingredient map. The keys to the top-level map are ingredient names. Each value
+// Declare "veg" and "extras" ingredient maps. The keys to the top-level map are ingredient names. Each value
 // is itself a map where the key is a number of "minutes before serving time" and the value
 // is the step to complete at this time.
-var sides = new Map();
-sides.set('Roast Potatoes', new Map([
+var veg = new Map();
+veg.set('Roast Potatoes', new Map([
   [90,'Peel and cut the potatoes into quarters. Place them in a saucepan and cover with cold water. Bring to the boil.'],
   [80,'Once the potatoes have come to the boil, reduce to a simmer.'],
   [75,'Place some oil in a roasting dish and place in the oven to heat up the oil.'],
   [70,'Once the potatoes have simmered for 10 minutes, drain them. Add the potatoes to the roasting dish with hot oil in, and turn them to ensure they have a thin coating of oil on all sides. Return the dish to the oven.'],
   [30,'Turn the potatoes.']
 ]));
-sides.set('Roast Parsnips', new Map([
+veg.set('Roast Parsnips', new Map([
   [65,'Peel the parsnips and chop into batons.'],
   [60,'Place some oil in the roasting dish, add the parsnips and turn them to ensure they have a thin coating of oil on all sides. Put the dish in the oven.']
 ]));
-sides.set('Roast Carrots', new Map([
+veg.set('Roast Carrots', new Map([
   [65,'Peel the carrots and chop into batons.'],
   [60,'Place some oil in the roasting dish, add the carrots and turn them to ensure they have a thin coating of oil on all sides. Put the dish in the oven.']
 ]));
-sides.set('Boiled Carrots', new Map([
+veg.set('Boiled Carrots', new Map([
   [25,'Peel and chop the carrots. Place in a saucepan of cold water and bring to the boil, or in a steamer over boiling water.']
 ]));
-sides.set('Swede (mashed)', new Map([
+veg.set('Swede (mashed)', new Map([
   [40,'Peel and chop the swede. Place in a saucepan of cold water and bring to the boil.'],
   [5,'Drain the swede, return to the saucepan (off the heat), add some butter and mash it.']
 ]));
-sides.set('Sprouts', new Map([
+veg.set('Sprouts', new Map([
   [15,'Wash the sprouts and cut a small cross in the base of each sprout with a knife.'],
   [10,'Place the sprouts into a saucepan of boiling water, or a steamer.']
 ]));
-sides.set('Runner Beans', new Map([
+veg.set('Runner Beans', new Map([
   [10,'Wash the runner beans and place them in a saucepan of boiling water, or in a steamer.']
 ]));
-sides.set('Broad Beans', new Map([
+veg.set('Broad Beans', new Map([
   [15,'Wash the broad beans and place them in a saucepan of boiling water, or in a steamer.']
 ]));
-sides.set('Broccoli', new Map([
+veg.set('Broccoli', new Map([
   [15,'Wash the broccoli and cut the florets from the stem. Further divide the florets if necessary until you have roughly one-inch pieces. Place into a steamer above boiling water.']
 ]));
-sides.set('Peas', new Map([
+veg.set('Peas', new Map([
   [10,'Place frozen peas into a saucepan of boiling water, or a steamer.']
 ]));
-sides.set('Pigs in Blankets (mini)', new Map([
+var extras = new Map();
+extras.set('Pigs in Blankets (mini)', new Map([
   [30,'Place the pigs in blankets into an oven dish, and place in the oven.']
 ]));
-sides.set('Pigs in Blankets (full size)', new Map([
+extras.set('Pigs in Blankets (full size)', new Map([
   [50,'Wrap each sausage with a rasher of bacon.'],
   [45,'Place the pigs in blankets into an oven dish, and place in the oven.']
 ]));
-sides.set('Yorkshire Puddings (frozen)', new Map([
+extras.set('Yorkshire Puddings (frozen)', new Map([
   [5,'Place frozen Yorksire puddings on a baking tray in the oven.']
 ]));
-sides.set('Yorkshire Puddings (batter mix)', new Map([
+extras.set('Yorkshire Puddings (batter mix)', new Map([
   [45, 'Mix the Yorkshire pudding batter as instructed by packaging'],
   [40, 'Place Yorkshire puddings tin with a little oil in each, and put in oven to warm'],
   [25, 'Divide Yorkshire pudding batter equally into tin compartments and put it back into the oven'],
   [5, 'Remove Yorkshire puddings from oven, or when they are risen and golden']
 ]));
-sides.set('Stuffing balls (home-made)', new Map([
+extras.set('Stuffing balls (home-made)', new Map([
   [60,'Finely chop quarter of an onion and fry gently until soft. Leave to cool.'],
   [45,'Combine sausagemeat, the fried onion and sage, and roll into stuffing balls.'],
   [40,'Place stuffing on a tray or oven dish and place it in the oven.']
 ]));
-sides.set('Stuffing balls (from packet)', new Map([
+extras.set('Stuffing balls (from packet)', new Map([
   [35,'Boil water and make the stuffing according to packet instructions.'],
   [30,'Form stuffing into balls.'],
   [25,'Place stuffing on a tray or oven dish and place it in the oven.']
 ]));
-sides.set('Gravy (from granules)', new Map([
+extras.set('Gravy (from granules)', new Map([
   [10,'Heat a pan of water to a gentle simmer, or if using a steamer for vegetables then use the steamer base. Add gravy granules and stir until the required thickness is achieved.'],
   [5,'Add the juices from the meat roasting dish to the gravy.']
 ]));
@@ -159,15 +164,25 @@ function setup() {
   jQuery('#radioLB').change(function() { jQuery("#weight").val((parseFloat(jQuery("#weight").val()) / 0.454).toPrecision(2)); recalculate(); });
   jQuery('#radioKG').change(function() { jQuery("#weight").val((parseFloat(jQuery("#weight").val()) * 0.454).toPrecision(2)); recalculate(); });
   
-  // Set up side ingredient checkboxes
-  sideIngCheckboxHTML = '';
-  ings = Array.from( sides.keys() );
+  // Set up veg checkboxes
+  vegCheckboxHTML = '';
+  ings = Array.from( veg.keys() );
   for (i = 0; i < ings.length; i++) { 
-    sideIngCheckboxHTML += '<span class="item"><input type="checkbox" class="ingCheckbox" value="' + ings[i] + '" id="checkbox' + i + '"/><label for="checkbox' + i + '">' + ings[i] + '</label></span>';
+    vegCheckboxHTML += '<span class="item"><input type="checkbox" class="vegCheckbox" value="' + ings[i] + '" id="vegCheckbox' + i + '"/><label for="vegCheckbox' + i + '">' + ings[i] + '</label></span>';
   }
-  jQuery('#sideIngredientList').html(sideIngCheckboxHTML);
-  jQuery('.ingCheckbox').change(function() { recalculate(); });
-  jQuery('.ingCheckbox').checkboxradio();
+  jQuery('#vegList').html(vegCheckboxHTML);
+  jQuery('.vegCheckbox').change(function() { recalculate(); });
+  jQuery('.vegCheckbox').checkboxradio();
+
+  // Set up extras checkboxes
+  extrasCheckboxHTML = '';
+  ings = Array.from( extras.keys() );
+  for (i = 0; i < ings.length; i++) { 
+    extrasCheckboxHTML += '<span class="item"><input type="checkbox" class="extrasCheckbox" value="' + ings[i] + '" id="extraCheckbox' + i + '"/><label for="extraCheckbox' + i + '">' + ings[i] + '</label></span>';
+  }
+  jQuery('#extrasList').html(extrasCheckboxHTML);
+  jQuery('.extrasCheckbox').change(function() { recalculate(); });
+  jQuery('.extrasCheckbox').checkboxradio();
   
   // Set up serving time picker
   jQuery.widget( "ui.timespinner", $.ui.spinner, {
@@ -187,31 +202,41 @@ function setup() {
   // Default selections
   jQuery('#radio0').prop("checked", true);
   jQuery('#radio0').button( "refresh" );
-  jQuery('#checkbox0').prop("checked", true);
-  jQuery('#checkbox0').button( "refresh" );
-  jQuery('#checkbox2').prop("checked", true);
-  jQuery('#checkbox2').button( "refresh" );
-  jQuery('#checkbox8').prop("checked", true);
-  jQuery('#checkbox8').button( "refresh" );
-  jQuery('#checkbox12').prop("checked", true);
-  jQuery('#checkbox12').button( "refresh" );
+  jQuery('#vegCheckbox0').prop("checked", true);
+  jQuery('#vegCheckbox0').button( "refresh" );
+  jQuery('#vegCheckbox2').prop("checked", true);
+  jQuery('#vegCheckbox2').button( "refresh" );
+  jQuery('#extraCheckbox0').prop("checked", true);
+  jQuery('#extraCheckbox0').button( "refresh" );
+  jQuery('#extraCheckbox5').prop("checked", true);
+  jQuery('#extraCheckbox5').button( "refresh" );
   recalculate();
 }
 
 // Recalculate timings
 function recalculate() {
   // Figure out which side ingredients are selected
-  chosenIngs = new Array();
-  jQuery('.ingCheckbox').each(function () {
+  chosenVeg = new Array();
+  jQuery('.vegCheckbox').each(function () {
     if (this.checked) {
-      chosenIngs.push(jQuery(this).val());
+      chosenVeg.push(jQuery(this).val());
+    }
+  });
+  chosenExtras = new Array();
+  jQuery('.extrasCheckbox').each(function () {
+    if (this.checked) {
+      chosenExtras.push(jQuery(this).val());
     }
   });
   
   // Get all timings for those side ingredients
   var allTimings = new Map();
-  for (i = 0; i < chosenIngs.length; i++) { 
-    var currentIng = sides.get(chosenIngs[i]);
+  for (i = 0; i < chosenVeg.length; i++) { 
+    var currentIng = veg.get(chosenVeg[i]);
+    allTimings = mergeTimingMaps(currentIng, allTimings);
+  }
+  for (i = 0; i < chosenExtras.length; i++) { 
+    var currentIng = extras.get(chosenExtras[i]);
     allTimings = mergeTimingMaps(currentIng, allTimings);
   }
   
