@@ -146,6 +146,8 @@ extras.set('Gravy (from granules)', new Map([
   [5,'Add the juices from the meat roasting dish to the gravy.']
 ]));
 
+var custom = {};
+
 // Set up the page contents
 function setup() {  
   // Set up meat radio buttons
@@ -299,10 +301,31 @@ function recalculate() {
   tableHTML += '<tr><td valign="top"></td><td>Make sure your meat isn&apos;t frozen! If it is, thaw it out before starting to cook. This could be overnight for smaller joints of meat but could take several days for a huge turkey.</td></tr>';
   steps.forEach(function a(value, key, map) {
     actualTime = new Date(serveTime - (parseInt(key) * 60000));
-    tableHTML += '<tr><td valign="top" class="timetd"><strong>' + formatTime(actualTime) + '</strong></td><td>' + value + '</td></tr>';
+    tableHTML += '<tr><td valign="top" class="timetd"><strong>' + formatTime(actualTime) + '</strong><br><button onclick="javascript:addCustom(' + key + ')">+</button></td><td>' + value + '</td></tr>';
+    if (key in custom) {
+      for (let i = 0; i < custom[key].length; i++) {
+        let text = custom[key][i];
+        tableHTML += '<tr><td><button onclick="javascript:deleteCustom(' + key + ', ' + i + ')">&times;</button></td><td>' + text + '</td></tr>';
+      };
+    }
   });
   tableHTML += '</table>';
   jQuery('#chart').html(tableHTML);
+}
+
+// Add a custom entry to the chart after 'time'
+function addCustom(time) {
+    var text = prompt("Enter custom entry:");
+    if (!text) return;
+    custom[time] ||= [];
+    custom[time].push(text);
+    recalculate();
+}
+
+// Delete a custom entry from the chart
+function deleteCustom(time, i) {
+    custom[time].splice(i,1);
+    recalculate();
 }
 
 // Util: Time formatter
