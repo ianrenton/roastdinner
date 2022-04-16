@@ -146,6 +146,8 @@ extras.set('Gravy (from granules)', new Map([
   [5,'Add the juices from the meat roasting dish to the gravy.']
 ]));
 
+var custom = new Map();
+
 // Set up the page contents
 function setup() {  
   // Set up meat radio buttons
@@ -293,16 +295,49 @@ function recalculate() {
   
   // Get the serving time
   serveTime = jQuery('#serveTime').timespinner('value')
+
+  // Get custom timings in sorted order
+  var customTimings = [];
+  for (var [key,val] of Object.entries(custom)) {
+    customTimings.push({
+      time: key,
+      notes: val,
+    });
+  }
+  customTimings.sort(function(a,b) {
+    return b.time-a.time;
+  });
   
   // Build the table
   tableHTML = '<table>';
   tableHTML += '<tr><td valign="top"></td><td>Make sure your meat isn&apos;t frozen! If it is, thaw it out before starting to cook. This could be overnight for smaller joints of meat but could take several days for a huge turkey.</td></tr>';
   steps.forEach(function a(value, key, map) {
+    if (customTimings.length && customTimings[0].time > key) {
+      tableHTML += formatCustom(customTimings.shift());
+    }
+
     actualTime = new Date(serveTime - (parseInt(key) * 60000));
-    tableHTML += '<tr><td valign="top" class="timetd"><strong>' + formatTime(actualTime) + '</strong></td><td>' + value + '</td></tr>';
+    tableHTML += '<tr><td valign="top" class="timetd"><strong>' + formatTime(actualTime) + '</strong><br><button onclick="javascript:addCustom(' + key + ')">+</button></td><td>' + value + '</td></tr>';
   });
+  if (customTimings.length)
+      tableHTML += formatCustom(customTimings.shift());
   tableHTML += '</table>';
   jQuery('#chart').html(tableHTML);
+}
+
+// Add a custom entry to the chart after 'time'
+function addCustom(time) {
+    var text = prompt("Enter custom entry:");
+    if (!text) return;
+    custom[time] ||= [];
+    custom[time].push(text);
+    recalculate();
+}
+
+// Delete a custom entry from the chart
+function deleteCustom(time, i) {
+    custom[time].splice(i,1);
+    recalculate();
 }
 
 // Util: Time formatter
@@ -341,6 +376,16 @@ function mergeTimingMaps(source, destination) {
   });
   return destination;
 }
+
+// Util: Custom timing formatter
+function formatCustom(c) {
+    var html = '';
+    for (var i = 0; i < c.notes.length; i++) {
+      html += '<tr><td><button onclick="javascript:deleteCustom(' + c.time + ', ' + i + ')">&times;</button></td><td>' + c.notes[i] + '</td></tr>';
+    };
+    return html;
+}
+
 </script>
 
 </body>
